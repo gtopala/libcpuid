@@ -43,3 +43,6 @@ tests/convert_instlatx64
 build
 docs
 .vscode
+.vs
+cpuid_tool/raw.txt
+cpuid_tool/report.txt
