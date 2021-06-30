@@ -232,7 +232,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>libcpuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\lib\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\lib\$(Platform)XP\</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

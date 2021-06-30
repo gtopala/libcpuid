@@ -129,7 +129,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\lib\$(Platform)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\..\..\lib\$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\..\..\lib\$(Platform)XP\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">$(ProjectDir)x$(PlatformArchitecture)\$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\lib\$(Platform)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|x64'">..\..\..\..\lib\$(Platform)\</OutDir>
@@ -264,7 +264,7 @@
       <UseFullPaths>false</UseFullPaths>
     </ClCompile>
     <Lib>
-      <OutputFile>..\..\..\..\lib\$(Platform)\$(ProjectName).lib</OutputFile>
+      <OutputFile>..\..\..\..\lib\$(Platform)XP\$(ProjectName).lib</OutputFile>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
