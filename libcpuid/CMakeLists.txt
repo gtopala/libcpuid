@@ -12,11 +12,8 @@ if("${MSVC_CXX_ARCHITECTURE_ID}" MATCHES "x64")
   list(APPEND cpuid_sources masm-x64.asm)
 endif()
 
-if(UNIX)
-  add_library(cpuid SHARED ${cpuid_sources})
-else()
-  add_library(cpuid ${cpuid_sources})
-endif()
+add_library(cpuid ${cpuid_sources})
+set_property(TARGET cpuid PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
 target_include_directories(cpuid SYSTEM PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_compile_definitions(cpuid PRIVATE VERSION="${PROJECT_VERSION}")
@@ -67,7 +64,7 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${version_config}" COMPATIBILITY SameMajorVersion)
 
 # Configure '<PROJECT-NAME>Config.cmake' Use variables: * TARGETS_EXPORT_NAME * PROJECT_NAME
-configure_package_config_file("${CMAKE_MODULE_PATH}/Config.cmake.in" "${project_config}"
+configure_package_config_file("${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in" "${project_config}"
                               INSTALL_DESTINATION "${config_install_dir}")
 
 # Installation
