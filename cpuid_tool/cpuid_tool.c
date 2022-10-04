@@ -58,6 +58,8 @@ char raw_data_file[256] = "";
 char out_file[256] = "";
 typedef enum {
 	NEED_CPUID_PRESENT,
+	NEED_ARCHITECTURE,
+	NEED_PURPOSE,
 	NEED_VENDOR_STR,
 	NEED_VENDOR_ID,
 	NEED_BRAND_STRING,
@@ -69,6 +71,7 @@ typedef enum {
 	NEED_NUM_CORES,
 	NEED_NUM_LOGICAL,
 	NEED_TOTAL_CPUS,
+	NEED_AFFI_MASK,
 	NEED_L1D_SIZE,
 	NEED_L1I_SIZE,
 	NEED_L2_SIZE,
@@ -84,6 +87,11 @@ typedef enum {
 	NEED_L2_CACHELINE,
 	NEED_L3_CACHELINE,
 	NEED_L4_CACHELINE,
+	NEED_L1D_INSTANCES,
+	NEED_L1I_INSTANCES,
+	NEED_L2_INSTANCES,
+	NEED_L3_INSTANCES,
+	NEED_L4_INSTANCES,
 	NEED_CODENAME,
 	NEED_FEATURES,
 	NEED_CLOCK,
@@ -105,6 +113,7 @@ int need_input = 0,
     need_version = 0,
     need_cpulist = 0,
     need_sgx = 0,
+    need_hypervisor = 0,
     need_identify = 0;
 
 #define MAX_REQUESTS 32
@@ -117,6 +126,8 @@ FILE *fout;
 const struct { output_data_switch sw; const char* synopsis; int ident_required; }
 matchtable[] = {
 	{ NEED_CPUID_PRESENT, "--cpuid"        , 0},
+	{ NEED_ARCHITECTURE , "--architecture" , 1},
+	{ NEED_PURPOSE      , "--purpose"      , 1},
 	{ NEED_VENDOR_STR   , "--vendorstr"    , 1},
 	{ NEED_VENDOR_ID    , "--vendorid"     , 1},
 	{ NEED_BRAND_STRING , "--brandstr"     , 1},
@@ -128,6 +139,7 @@ matchtable[] = {
 	{ NEED_NUM_CORES    , "--cores"        , 1},
 	{ NEED_NUM_LOGICAL  , "--logical"      , 1},
 	{ NEED_TOTAL_CPUS   , "--total-cpus"   , 1},
+	{ NEED_AFFI_MASK    , "--affi-mask"    , 1},
 	{ NEED_L1D_SIZE     , "--l1d-cache"    , 1},
 	{ NEED_L1I_SIZE     , "--l1i-cache"    , 1},
 	{ NEED_L2_SIZE      , "--cache"        , 1},
@@ -144,6 +156,11 @@ matchtable[] = {
 	{ NEED_L2_CACHELINE , "--l2-cacheline" , 1},
 	{ NEED_L3_CACHELINE , "--l3-cacheline" , 1},
 	{ NEED_L4_CACHELINE , "--l4-cacheline" , 1},
+	{ NEED_L1D_INSTANCES, "--l1d-instances", 1},
+	{ NEED_L1I_INSTANCES, "--l1i-instances", 1},
+	{ NEED_L2_INSTANCES , "--l2-instances" , 1},
+	{ NEED_L3_INSTANCES , "--l3-instances" , 1},
+	{ NEED_L4_INSTANCES , "--l4-instances" , 1},
 	{ NEED_CODENAME     , "--codename"     , 1},
 	{ NEED_FEATURES     , "--flags"        , 1},
 	{ NEED_CLOCK        , "--clock"        , 0},
@@ -172,6 +189,7 @@ static void usage(void)
 	printf("  --clock-rdtsc    - same as --clock, but use RDTSC for clock detection\n");
 	printf("  --cpulist        - list all known CPUs\n");
 	printf("  --sgx            - list SGX leaf data, if SGX is supported.\n");
+	printf("  --hypervisor     - print hypervisor vendor if detected.\n");
 	printf("  --quiet          - disable warnings\n");
 	printf("  --outfile=<file> - redirect all output to this file, instead of stdout\n");
 	printf("  --verbose, -v    - be extra verbose (more keys increase verbosiness level)\n");
@@ -291,6 +309,11 @@ static int parse_cmdline(int argc, char** argv)
 			need_identify = 1;
 			recog = 1;
 		}
+		if (!strcmp(arg, "--hypervisor")) {
+			need_hypervisor = 1;
+			need_identify = 1;
+			recog = 1;
+		}
 		if (arg[0] == '-' && arg[1] == 'v') {
 			num_vs = 1;
 			while (arg[num_vs] == 'v')
@@ -337,14 +360,19 @@ static int check_need_raw_data(void)
 	return 0;
 }
 
-static void print_info(output_data_switch query, struct cpu_raw_data_t* raw,
-                       struct cpu_id_t* data)
+static void print_info(output_data_switch query, struct cpu_id_t* data)
 {
 	int i, value;
 	struct msr_driver_t* handle;
 	switch (query) {
 		case NEED_CPUID_PRESENT:
 			fprintf(fout, "%d\n", cpuid_present());
+			break;
+		case NEED_ARCHITECTURE:
+			fprintf(fout, "%s\n", cpu_architecture_str(data->architecture));
+			break;
+		case NEED_PURPOSE:
+			fprintf(fout, "%s\n", cpu_purpose_str(data->purpose));
 			break;
 		case NEED_VENDOR_STR:
 			fprintf(fout, "%s\n", data->vendor_str);
@@ -378,6 +406,9 @@ static void print_info(output_data_switch query, struct cpu_raw_data_t* raw,
 			break;
 		case NEED_TOTAL_CPUS:
 			fprintf(fout, "%d\n", cpuid_get_total_cpus());
+			break;
+		case NEED_AFFI_MASK:
+			fprintf(fout, "0x%s\n", affinity_mask_str(&data->affinity_mask));
 			break;
 		case NEED_L1D_SIZE:
 			fprintf(fout, "%d\n", data->l1_data_cache);
@@ -423,6 +454,21 @@ static void print_info(output_data_switch query, struct cpu_raw_data_t* raw,
 			break;
 		case NEED_L4_CACHELINE:
 			fprintf(fout, "%d\n", data->l4_cacheline);
+			break;
+		case NEED_L1D_INSTANCES:
+			fprintf(fout, "%d\n", data->l1_data_instances);
+			break;
+		case NEED_L1I_INSTANCES:
+			fprintf(fout, "%d\n", data->l1_instruction_instances);
+			break;
+		case NEED_L2_INSTANCES:
+			fprintf(fout, "%d\n", data->l2_instances);
+			break;
+		case NEED_L3_INSTANCES:
+			fprintf(fout, "%d\n", data->l3_instances);
+			break;
+		case NEED_L4_INSTANCES:
+			fprintf(fout, "%d\n", data->l4_instances);
 			break;
 		case NEED_CODENAME:
 			fprintf(fout, "%s\n", data->cpu_codename);
@@ -542,13 +588,47 @@ static void print_sgx_data(const struct cpu_raw_data_t* raw, const struct cpu_id
 	}
 }
 
+static void print_hypervisor(struct cpu_raw_data_t* raw, struct cpu_id_t* data)
+{
+	int i;
+	const char *hypervisor_str = NULL;
+	const hypervisor_vendor_t hypervisor = cpuid_get_hypervisor(raw, data);
+	const struct { const char *name; hypervisor_vendor_t hypervisor; } hypervisors_vendors[NUM_HYPERVISOR_VENDORS] = {
+		{ "none",               HYPERVISOR_NONE       },
+		{ "FreeBSD bhyve",      HYPERVISOR_BHYVE      },
+		{ "Microsoft Hyper-V ", HYPERVISOR_HYPERV     },
+		{ "KVM",                HYPERVISOR_KVM        },
+		{ "Parallels",          HYPERVISOR_PARALLELS  },
+		{ "QEMU",               HYPERVISOR_QEMU       },
+		{ "VirtualBox",         HYPERVISOR_VIRTUALBOX },
+		{ "VMware",             HYPERVISOR_VMWARE     },
+		{ "Xen",                HYPERVISOR_XEN        },
+	};
+	for (i = 0; i < NUM_HYPERVISOR_VENDORS; i++)
+		if (hypervisors_vendors[i].hypervisor == hypervisor) {
+			hypervisor_str = hypervisors_vendors[i].name;
+			break;
+		}
+	fprintf(fout, "Hypervisor vendor: %s\n", (hypervisor_str == NULL) ? "unknown" : hypervisor_str);
+	if (hypervisor == HYPERVISOR_NONE)
+		fprintf(fout, "Caution: no hypervisor detected from CPUID bits, but a hypervisor may be hidden.\n"
+		              "Refer to https://github.com/anrieff/libcpuid/issues/90#issuecomment-296568713\n");
+}
+
 int main(int argc, char** argv)
 {
 	int parseres = parse_cmdline(argc, argv);
 	int i, readres, writeres;
 	int only_clock_queries;
-	struct cpu_raw_data_t raw;
-	struct cpu_id_t data;
+	uint8_t cpu_type_index;
+	struct cpu_raw_data_array_t raw_array = {
+		.with_affinity = false,
+		.num_raw       = 0,
+		.raw           = NULL
+	};
+	struct system_id_t data = {
+		.num_cpu_types = 0
+	};
 
 	if (parseres != 1)
 		return parseres;
@@ -580,10 +660,10 @@ int main(int argc, char** argv)
 		/* We have a request to input raw CPUID data from file: */
 		if (!strcmp(raw_data_file, "-"))
 			/* Input from stdin */
-			readres = cpuid_deserialize_raw_data(&raw, "");
+			readres = cpuid_deserialize_all_raw_data(&raw_array, "");
 		else
 			/* Input from file */
-			readres = cpuid_deserialize_raw_data(&raw, raw_data_file);
+			readres = cpuid_deserialize_all_raw_data(&raw_array, raw_data_file);
 		if (readres < 0) {
 			if (!need_quiet) {
 				fprintf(stderr, "Cannot deserialize raw data from ");
@@ -599,7 +679,7 @@ int main(int argc, char** argv)
 	} else {
 		if (check_need_raw_data()) {
 			/* Try to obtain raw CPUID data from the CPU: */
-			readres = cpuid_get_raw_data(&raw);
+			readres = cpuid_get_all_raw_data(&raw_array);
 			if (readres < 0) {
 				if (!need_quiet) {
 					fprintf(stderr, "Cannot obtain raw CPU data!\n");
@@ -612,14 +692,12 @@ int main(int argc, char** argv)
 
 	/* Need to dump raw CPUID data to file: */
 	if (need_output) {
-		if (verbose_level >= 1)
-			printf("Writing raw CPUID dump to `%s'\n", raw_data_file);
 		if (!strcmp(raw_data_file, "-"))
 			/* Serialize to stdout */
-			writeres = cpuid_serialize_raw_data(&raw, "");
+			writeres = cpuid_serialize_all_raw_data(&raw_array, "");
 		else
 			/* Serialize to file */
-			writeres = cpuid_serialize_raw_data(&raw, raw_data_file);
+			writeres = cpuid_serialize_all_raw_data(&raw_array, raw_data_file);
 		if (writeres < 0) {
 			if (!need_quiet) {
 				fprintf(stderr, "Cannot serialize raw data to ");
@@ -643,48 +721,58 @@ int main(int argc, char** argv)
 		 * Try CPU identification
 		 * (this fill the `data' structure with decoded CPU features)
 		 */
-		if (cpu_identify(&raw, &data) < 0)
+		if (cpu_identify_all(&raw_array, &data) < 0)
 			fprintf(fout, "Error identifying the CPU: %s\n", cpuid_error());
 
 		/* OK, now write what we have in `data'...: */
-		fprintf(fout, "CPU Info:\n------------------\n");
-		fprintf(fout, "  vendor_str : `%s'\n", data.vendor_str);
-		fprintf(fout, "  vendor id  : %d\n", (int) data.vendor);
-		fprintf(fout, "  brand_str  : `%s'\n", data.brand_str);
-		fprintf(fout, "  family     : %d (%02Xh)\n", data.family, data.family);
-		fprintf(fout, "  model      : %d (%02Xh)\n", data.model, data.model);
-		fprintf(fout, "  stepping   : %d (%02Xh)\n", data.stepping, data.stepping);
-		fprintf(fout, "  ext_family : %d (%02Xh)\n", data.ext_family, data.ext_family);
-		fprintf(fout, "  ext_model  : %d (%02Xh)\n", data.ext_model, data.ext_model);
-		fprintf(fout, "  num_cores  : %d\n", data.num_cores);
-		fprintf(fout, "  num_logical: %d\n", data.num_logical_cpus);
-		fprintf(fout, "  tot_logical: %d\n", data.total_logical_cpus);
-		fprintf(fout, "  L1 D cache : %d KB\n", data.l1_data_cache);
-		fprintf(fout, "  L1 I cache : %d KB\n", data.l1_instruction_cache);
-		fprintf(fout, "  L2 cache   : %d KB\n", data.l2_cache);
-		fprintf(fout, "  L3 cache   : %d KB\n", data.l3_cache);
-		fprintf(fout, "  L4 cache   : %d KB\n", data.l4_cache);
-		fprintf(fout, "  L1D assoc. : %d-way\n", data.l1_data_assoc);
-		fprintf(fout, "  L1I assoc. : %d-way\n", data.l1_instruction_assoc);
-		fprintf(fout, "  L2 assoc.  : %d-way\n", data.l2_assoc);
-		fprintf(fout, "  L3 assoc.  : %d-way\n", data.l3_assoc);
-		fprintf(fout, "  L4 assoc.  : %d-way\n", data.l4_assoc);
-		fprintf(fout, "  L1D line sz: %d bytes\n", data.l1_data_cacheline);
-		fprintf(fout, "  L1I line sz: %d bytes\n", data.l1_instruction_cacheline);
-		fprintf(fout, "  L2 line sz : %d bytes\n", data.l2_cacheline);
-		fprintf(fout, "  L3 line sz : %d bytes\n", data.l3_cacheline);
-		fprintf(fout, "  L4 line sz : %d bytes\n", data.l4_cacheline);
-		fprintf(fout, "  SSE units  : %d bits (%s)\n", data.sse_size, data.detection_hints[CPU_HINT_SSE_SIZE_AUTH] ? "authoritative" : "non-authoritative");
-		fprintf(fout, "  code name  : `%s'\n", data.cpu_codename);
-		fprintf(fout, "  features   :");
-		/*
-		 * Here we enumerate all CPU feature bits, and when a feature
-		 * is present output its name:
-		 */
-		for (i = 0; i < NUM_CPU_FEATURES; i++)
-			if (data.flags[i])
-				fprintf(fout, " %s", cpu_feature_str(i));
-		fprintf(fout, "\n");
+		for (cpu_type_index = 0; cpu_type_index < data.num_cpu_types; cpu_type_index++) {
+			fprintf(fout, "CPU Info for type #%d:\n------------------\n", cpu_type_index);
+			fprintf(fout, "  arch       : %s\n", cpu_architecture_str(data.cpu_types[cpu_type_index].architecture));
+			fprintf(fout, "  purpose    : %s\n", cpu_purpose_str(data.cpu_types[cpu_type_index].purpose));
+			fprintf(fout, "  vendor_str : `%s'\n", data.cpu_types[cpu_type_index].vendor_str);
+			fprintf(fout, "  vendor id  : %d\n", (int) data.cpu_types[cpu_type_index].vendor);
+			fprintf(fout, "  brand_str  : `%s'\n", data.cpu_types[cpu_type_index].brand_str);
+			fprintf(fout, "  family     : %d (%02Xh)\n", data.cpu_types[cpu_type_index].family, data.cpu_types[cpu_type_index].family);
+			fprintf(fout, "  model      : %d (%02Xh)\n", data.cpu_types[cpu_type_index].model, data.cpu_types[cpu_type_index].model);
+			fprintf(fout, "  stepping   : %d (%02Xh)\n", data.cpu_types[cpu_type_index].stepping, data.cpu_types[cpu_type_index].stepping);
+			fprintf(fout, "  ext_family : %d (%02Xh)\n", data.cpu_types[cpu_type_index].ext_family, data.cpu_types[cpu_type_index].ext_family);
+			fprintf(fout, "  ext_model  : %d (%02Xh)\n", data.cpu_types[cpu_type_index].ext_model, data.cpu_types[cpu_type_index].ext_model);
+			fprintf(fout, "  num_cores  : %d\n", data.cpu_types[cpu_type_index].num_cores);
+			fprintf(fout, "  num_logical: %d\n", data.cpu_types[cpu_type_index].num_logical_cpus);
+			fprintf(fout, "  tot_logical: %d\n", data.cpu_types[cpu_type_index].total_logical_cpus);
+			fprintf(fout, "  affi_mask  : 0x%s\n", affinity_mask_str(&data.cpu_types[cpu_type_index].affinity_mask));
+			fprintf(fout, "  L1 D cache : %d KB\n", data.cpu_types[cpu_type_index].l1_data_cache);
+			fprintf(fout, "  L1 I cache : %d KB\n", data.cpu_types[cpu_type_index].l1_instruction_cache);
+			fprintf(fout, "  L2 cache   : %d KB\n", data.cpu_types[cpu_type_index].l2_cache);
+			fprintf(fout, "  L3 cache   : %d KB\n", data.cpu_types[cpu_type_index].l3_cache);
+			fprintf(fout, "  L4 cache   : %d KB\n", data.cpu_types[cpu_type_index].l4_cache);
+			fprintf(fout, "  L1D assoc. : %d-way\n", data.cpu_types[cpu_type_index].l1_data_assoc);
+			fprintf(fout, "  L1I assoc. : %d-way\n", data.cpu_types[cpu_type_index].l1_instruction_assoc);
+			fprintf(fout, "  L2 assoc.  : %d-way\n", data.cpu_types[cpu_type_index].l2_assoc);
+			fprintf(fout, "  L3 assoc.  : %d-way\n", data.cpu_types[cpu_type_index].l3_assoc);
+			fprintf(fout, "  L4 assoc.  : %d-way\n", data.cpu_types[cpu_type_index].l4_assoc);
+			fprintf(fout, "  L1D line sz: %d bytes\n", data.cpu_types[cpu_type_index].l1_data_cacheline);
+			fprintf(fout, "  L1I line sz: %d bytes\n", data.cpu_types[cpu_type_index].l1_instruction_cacheline);
+			fprintf(fout, "  L2 line sz : %d bytes\n", data.cpu_types[cpu_type_index].l2_cacheline);
+			fprintf(fout, "  L3 line sz : %d bytes\n", data.cpu_types[cpu_type_index].l3_cacheline);
+			fprintf(fout, "  L4 line sz : %d bytes\n", data.cpu_types[cpu_type_index].l4_cacheline);
+			fprintf(fout, "  L1D inst.  : %d\n", data.cpu_types[cpu_type_index].l1_data_instances);
+			fprintf(fout, "  L1I inst.  : %d\n", data.cpu_types[cpu_type_index].l1_instruction_instances);
+			fprintf(fout, "  L2 inst.   : %d\n", data.cpu_types[cpu_type_index].l2_instances);
+			fprintf(fout, "  L3 inst.   : %d\n", data.cpu_types[cpu_type_index].l3_instances);
+			fprintf(fout, "  L4 inst.   : %d\n", data.cpu_types[cpu_type_index].l4_instances);
+			fprintf(fout, "  SSE units  : %d bits (%s)\n", data.cpu_types[cpu_type_index].sse_size, data.cpu_types[cpu_type_index].detection_hints[CPU_HINT_SSE_SIZE_AUTH] ? "authoritative" : "non-authoritative");
+			fprintf(fout, "  code name  : `%s'\n", data.cpu_types[cpu_type_index].cpu_codename);
+			fprintf(fout, "  features   :");
+			/*
+			* Here we enumerate all CPU feature bits, and when a feature
+			* is present output its name:
+			*/
+			for (i = 0; i < NUM_CPU_FEATURES; i++)
+				if (data.cpu_types[cpu_type_index].flags[i])
+					fprintf(fout, " %s", cpu_feature_str(i));
+			fprintf(fout, "\n");
+		}
 
 		/* Is CPU clock info requested? */
 		if (need_clockreport) {
@@ -714,23 +802,33 @@ int main(int argc, char** argv)
 		}
 	/* OK, process all queries. */
 	if (((!need_report || !only_clock_queries) && num_requests > 0) || need_identify) {
-		/* Identify the CPU. Make it do cpuid_get_raw_data() itself */
-		if (check_need_raw_data() && cpu_identify(&raw, &data) < 0) {
+		/* Identify the CPU. Make it do cpuid_get_all_raw_data() itself */
+		if (check_need_raw_data() && cpu_identify_all(&raw_array, &data) < 0) {
 			if (!need_quiet)
 				fprintf(stderr,
 				        "Error identifying the CPU: %s\n",
 				        cpuid_error());
 			return -1;
 		}
-		for (i = 0; i < num_requests; i++)
-			print_info(requests[i], &raw, &data);
+
+		for (cpu_type_index = 0; cpu_type_index < data.num_cpu_types; cpu_type_index++) {
+			if (raw_array.with_affinity)
+				fprintf(fout, "--------------------------------------------------------------------------------\n");
+			for (i = 0; i < num_requests; i++)
+				print_info(requests[i], &data.cpu_types[cpu_type_index]);
+		}
 	}
 	if (need_cpulist) {
 		print_cpulist();
 	}
 	if (need_sgx) {
-		print_sgx_data(&raw, &data);
+		print_sgx_data(&raw_array.raw[0], &data.cpu_types[0]);
+	}
+	if (need_hypervisor) {
+		print_hypervisor(&raw_array.raw[0], &data.cpu_types[0]);
 	}
 
+	cpuid_free_raw_data_array(&raw_array);
+	cpuid_free_system_id(&data);
 	return 0;
 }
