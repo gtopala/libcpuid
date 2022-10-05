@@ -201,7 +201,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>libcpuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\lib\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libcpuid\x$(PlatformArchitecture)\lib\</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -270,7 +270,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>libcpuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\lib\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libcpuid\x$(PlatformArchitecture)\lib\</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

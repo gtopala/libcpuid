@@ -128,10 +128,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)x$(PlatformArchitecture)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">x$(PlatformArchitecture)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\lib\$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x$(PlatformArchitecture)\lib\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\..\..\lib\$(Platform)XP\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">$(ProjectDir)x$(PlatformArchitecture)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\lib\$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">x$(PlatformArchitecture)\lib\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|x64'">..\..\..\..\lib\$(Platform)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">$(ProjectDir)x$(PlatformArchitecture)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">x$(PlatformArchitecture)\$(Configuration)\</IntDir>
@@ -188,7 +188,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;VERSION="0.5.0";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;VERSION="0.6.0";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -219,7 +219,7 @@
       <UseFullPaths>false</UseFullPaths>
     </ClCompile>
     <Lib>
-      <OutputFile>..\..\..\..\lib\$(Platform)\$(ProjectName).lib</OutputFile>
+      <OutputFile>x$(PlatformArchitecture)\lib\$(ProjectName).lib</OutputFile>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
@@ -301,7 +301,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;VERSION="0.5.0";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;VERSION="0.6.0";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -332,7 +332,7 @@
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
     </ClCompile>
     <Lib>
-      <OutputFile>..\..\..\..\lib\$(Platform)\$(ProjectName).lib</OutputFile>
+      <OutputFile>x$(PlatformArchitecture)\lib\$(ProjectName).lib</OutputFile>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
