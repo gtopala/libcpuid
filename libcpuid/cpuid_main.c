@@ -177,6 +177,10 @@ static bool set_cpu_affinity(logical_cpu_t logical_cpu)
 {
 	thread_affinity_policy_data_t ap;
 	ap.affinity_tag = logical_cpu + 1;
+	/* Note: thread_policy_set() always returns KERN_SUCCESS even if the target logical CPU does not exist
+	   Refer to #178 */
+	if (logical_cpu >= get_total_cpus())
+		return false;
 	return thread_policy_set(mach_thread_self(), THREAD_AFFINITY_POLICY, (thread_policy_t) &ap, THREAD_AFFINITY_POLICY_COUNT) == KERN_SUCCESS;
 }
 #define SET_CPU_AFFINITY
@@ -721,7 +725,7 @@ static int cpuid_basic_identify(struct cpu_raw_data_t* raw, struct cpu_id_t* dat
 			data->ext_family = data->family + xfamily;
 		data->ext_model = data->model + (xmodel << 4);
 	}
-	ext = raw->ext_cpuid[0][EAX] - 0x8000000;
+	ext = raw->ext_cpuid[0][EAX] - 0x80000000;
 
 	/* obtain the brand string, if present: */
 	if (ext >= 4) {
