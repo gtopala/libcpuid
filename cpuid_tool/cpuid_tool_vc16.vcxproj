@@ -198,6 +198,7 @@
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <ExceptionHandling>Async</ExceptionHandling>
       <UseFullPaths>false</UseFullPaths>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <AdditionalDependencies>libcpuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -267,6 +268,7 @@
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <ExceptionHandling>Async</ExceptionHandling>
       <UseFullPaths>false</UseFullPaths>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <AdditionalDependencies>libcpuid.lib;%(AdditionalDependencies)</AdditionalDependencies>

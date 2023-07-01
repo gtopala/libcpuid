@@ -39,6 +39,9 @@
     <ClCompile Include="rdmsr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="recog_centaur.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="asm-bits.h">

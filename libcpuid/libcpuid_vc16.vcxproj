@@ -217,6 +217,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <EnableModules>false</EnableModules>
       <UseFullPaths>false</UseFullPaths>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Lib>
       <OutputFile>x$(PlatformArchitecture)\lib\$(ProjectName).lib</OutputFile>
@@ -330,6 +331,7 @@
       <EnableModules>false</EnableModules>
       <UseFullPaths>false</UseFullPaths>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Lib>
       <OutputFile>x$(PlatformArchitecture)\lib\$(ProjectName).lib</OutputFile>
@@ -420,6 +422,7 @@
     <ClCompile Include="rdmsr.c" />
     <ClCompile Include="rdtsc.c" />
     <ClCompile Include="recog_amd.c" />
+    <ClCompile Include="recog_centaur.c" />
     <ClCompile Include="recog_intel.c" />
   </ItemGroup>
   <ItemGroup>
