@@ -63,15 +63,27 @@ fi
 AC_CANONICAL_HOST
 
 build_windows=no
+build_netbsd=no
+build_dragonflybsd=no
 
 case "${host_os}" in
     cygwin*|mingw*)
         build_windows=yes
         ;;
+    netbsd*)
+        build_netbsd=yes
+        ;;
+    dragonfly*)
+        build_dragonflybsd=yes
+        ;;
 esac
 
 if test "$build_windows" = "no"; then
     AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"
+fi
+
+if test "$build_netbsd" = "yes" || test "$build_dragonflybsd" = "yes"; then
+    AM_LDFLAGS="$AM_LDFLAGS -pthread"
 fi
 
 AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
