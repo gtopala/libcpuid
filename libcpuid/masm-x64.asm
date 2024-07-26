@@ -41,7 +41,6 @@ cpu_rdtsc endp
 
 ; procedure busy_sse_loop
 ; Signature: void busy_sse_loop(int cycles)
-align 4
 busy_sse_loop Proc
 	; save xmm6 & xmm7 into the shadow area, as Visual C++ 2008
 	; expects that we don't touch them:

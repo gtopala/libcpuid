@@ -36,8 +36,12 @@ ipch
 *.suo
 libcpuid/x32
 libcpuid/x64
+libcpuid/ARM64
+libcpuid/ARM64EC
 cpuid_tool/x32
 cpuid_tool/x64
+cpuid_tool/ARM64
+cpuid_tool/ARM64EC
 *.vcxproj.user
 build
 docs

@@ -6,17 +6,22 @@ set(LIBCPUID_AGE 0)
 set(LIBCPUID_REVISION 5)
 project(
   cpuid
-  LANGUAGES C CXX ASM_MASM
+  LANGUAGES C ASM_MASM
   VERSION ${VERSION})
+
+# CMake modules
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 if(MSVC)
   set(LIBCPUID_SHARED OFF)
 else()
   set(LIBCPUID_SHARED ON)
 endif()
-option(BUILD_SHARED_LIBS "Build shared lib" ${LIBCPUID_SHARED})
 
-option(LIBCPUID_TESTS "Enable building tests" OFF)
+# Options
+option(BUILD_SHARED_LIBS "Build building shared libraries" ${LIBCPUID_SHARED})
+option(LIBCPUID_BUILD_DRIVERS "Enable building kernel drivers" ON)
+option(LIBCPUID_ENABLE_TESTS "Enable tests targets" OFF)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 99)
@@ -47,15 +52,13 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
 endif()
 
 # Global variables
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-
 if(UNIX)
   include(GNUInstallDirs)
   set(prefix "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix "\${prefix}")
   set(libdir "\${exec_prefix}/lib")
   set(includedir "\${prefix}/include")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wuninitialized -Wstrict-prototypes -Wformat -Wformat-security -Wunused-parameter -Wno-deprecated-declarations")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wuninitialized -Wstrict-prototypes -Wformat -Wformat-security -Wunused-parameter -Wdeprecated-declarations")
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libcpuid.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/libcpuid.pc" ESCAPE_QUOTES
                  @ONLY)
   install(FILES "${PROJECT_BINARY_DIR}/libcpuid.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
@@ -64,6 +67,9 @@ endif(UNIX)
 # Include subdirectories
 add_subdirectory(libcpuid)
 add_subdirectory(cpuid_tool)
-if(LIBCPUID_TESTS)
+if(LIBCPUID_BUILD_DRIVERS)
+  add_subdirectory(drivers)
+endif(LIBCPUID_BUILD_DRIVERS)
+if(LIBCPUID_ENABLE_TESTS)
   add_subdirectory(tests)
-endif()
+endif(LIBCPUID_ENABLE_TESTS)
