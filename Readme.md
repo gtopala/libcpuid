@@ -22,13 +22,13 @@ libcpuid support varies depending on the features:
 
 |Name|Build|x86 MSR|ARM CPUID|
 |----|----|-------|---------|
-|DragonFly BSD|:grey_question: |:grey_question: ([`cpuctl` kernel module](https://man.freebsd.org/cgi/man.cgi?query=cpuctl))|:x:|
-|FreeBSD|:heavy_check_mark: |:heavy_check_mark: ([`cpuctl` kernel module](https://man.freebsd.org/cgi/man.cgi?query=cpuctl))|:heavy_check_mark:¹ ([`cpuid` out-of-tree kernel module](https://github.com/anrieff/libcpuid/tree/master/drivers/arm/freebsd))|
-|Linux|:heavy_check_mark: ![UNIX workflow status](https://github.com/anrieff/libcpuid/actions/workflows/unix.yml/badge.svg)|:heavy_check_mark: ([`msr` kernel module](https://man7.org/linux/man-pages/man4/msr.4.html))|:heavy_check_mark:¹ ([`cpuid` out-of-tree kernel module](https://github.com/anrieff/libcpuid/tree/master/drivers/arm/linux))|
-|macOS|:heavy_check_mark: ![UNIX workflow status](https://github.com/anrieff/libcpuid/actions/workflows/unix.yml/badge.svg)|:x:|:x:|
-|NetBSD|:grey_question:|:x:|:x:|
-|OpenBSD|:grey_question:|:x:|:x:|
-|Windows|:heavy_check_mark: ![Windows workflow status](https://github.com/anrieff/libcpuid/actions/workflows/windows.yml/badge.svg)|:heavy_check_mark: ([`msr` driver](https://github.com/anrieff/libcpuid/tree/master/drivers/x86/windows/msr))|:x:|
+|DragonFly BSD|[![Build (DragonFly BSD)](https://github.com/anrieff/libcpuid/actions/workflows/build_dragonflybsd.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_dragonflybsd.yml)|:grey_question: ([`cpuctl` kernel module](https://man.freebsd.org/cgi/man.cgi?query=cpuctl))|:x:|
+|FreeBSD|[![Build (FreeBSD)](https://github.com/anrieff/libcpuid/actions/workflows/build_freebsd.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_freebsd.yml)|:heavy_check_mark: ([`cpuctl` kernel module](https://man.freebsd.org/cgi/man.cgi?query=cpuctl))|:heavy_check_mark:¹ ([`cpuid` out-of-tree kernel module](https://github.com/anrieff/libcpuid/tree/master/drivers/arm/freebsd))|
+|Linux|[![Build (Linux)](https://github.com/anrieff/libcpuid/actions/workflows/build_linux.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_linux.yml)|:heavy_check_mark: ([`msr` kernel module](https://man7.org/linux/man-pages/man4/msr.4.html))|:heavy_check_mark:¹ ([`cpuid` out-of-tree kernel module](https://github.com/anrieff/libcpuid/tree/master/drivers/arm/linux))|
+|macOS|[![Build (macOS)](https://github.com/anrieff/libcpuid/actions/workflows/build_macos.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_macos.yml)|:x:|:x:|
+|NetBSD|[![Build (NetBSD)](https://github.com/anrieff/libcpuid/actions/workflows/build_netbsd.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_netbsd.yml)|:x:|:x:|
+|OpenBSD|[![Build (OpenBSD)](https://github.com/anrieff/libcpuid/actions/workflows/build_openbsd.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_openbsd.yml)|:x:|:x:|
+|Windows|[![Build (Windows)](https://github.com/anrieff/libcpuid/actions/workflows/build_windows.yml/badge.svg)](https://github.com/anrieff/libcpuid/actions/workflows/build_windows.yml)|:heavy_check_mark: ([`msr` driver](https://github.com/anrieff/libcpuid/tree/master/drivers/x86/windows/msr))|:x:|
 
 Legend:
 - :heavy_check_mark: Supported
@@ -131,7 +131,16 @@ Below, the full lists of repositories:
 
 ### As a software developer
 
+#### Native C library
+
 For details about the programming API, you might want to take a look at the short [tutorial](https://libcpuid.sourceforge.net/documentation.html), as well as the full [API reference](https://anrieff.github.io/libcpuid).
+
+#### Python bindings
+
+The libcpuid library features Python bindings, which can be installed as a library
+using `python -m pip install libcpuid`. Visit the
+[documentation at Read the Docs](https://libcpuid.readthedocs.io/en/latest/index.html#)
+to see how the library is used.
 
 ### As an end-user
 
