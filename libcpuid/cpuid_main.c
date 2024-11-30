@@ -1296,13 +1296,15 @@ int cpuid_present(void)
 #if defined(PLATFORM_X86) || defined(PLATFORM_X64)
 	return cpuid_exists_by_eflags();
 #elif defined(PLATFORM_AARCH64)
-# if defined(HAVE_GETAUXVAL) /* Linux */
+# if defined(HAVE_GETAUXVAL) && defined(HWCAP_CPUID) /* Linux */
 	return (getauxval(AT_HWCAP) & HWCAP_CPUID);
-# elif defined(HAVE_ELF_AUX_INFO) /* FreeBSD */
+# elif defined(HAVE_ELF_AUX_INFO) && defined(HWCAP_CPUID) /* FreeBSD */
 	unsigned long hwcap = 0;
 	if (elf_aux_info(AT_HWCAP, &hwcap, sizeof(hwcap)) == 0)
 		return ((hwcap & HWCAP_CPUID) != 0);
-# endif /* HAVE_GETAUXVAL */
+# elif !defined(HWCAP_CPUID)
+#  warning HWCAP_CPUID is not defined on this AArch64 system, cpuid_present() will always return 0
+# endif /* HWCAP_CPUID */
 	/* On AArch64, return 0 by default */
 	return 0;
 #else
@@ -1391,6 +1393,7 @@ int cpuid_get_raw_data_core(struct cpu_raw_data_t* data, logical_cpu_t logical_c
 	unsigned i;
 	struct cpuid_driver_t *handle;
 
+	/* Try to use cpuid kernel driver on AArch32/AArch64 states */
 	if ((handle = cpu_cpuid_driver_open_core(logical_cpu)) != NULL) {
 		debugf(2, "Using kernel driver to read register on logical CPU %u\n", logical_cpu);
 		cpu_read_arm_register_64b(handle, REQ_MIDR, &data->arm_midr);
@@ -1424,8 +1427,9 @@ int cpuid_get_raw_data_core(struct cpu_raw_data_t* data, logical_cpu_t logical_c
 # endif /* PLATFORM_AARCH64 */
 		cpu_cpuid_driver_close(handle);
 	}
-# if defined(PLATFORM_AARCH64)
 	else {
+# if defined(PLATFORM_AARCH64)
+		/* Fallback to MRS instruction on AArch64 state */
 		if (!cpuid_present())
 			return cpuid_set_error(ERR_NO_CPUID);
 		debugf(2, "Using MRS instruction to read register on logical CPU %u\n", logical_cpu);
@@ -1449,11 +1453,18 @@ int cpuid_get_raw_data_core(struct cpu_raw_data_t* data, logical_cpu_t logical_c
 		cpu_exec_mrs(AARCH64_REG_ID_AA64PFR2_EL1, data->arm_id_aa64pfr[2]);
 		cpu_exec_mrs(AARCH64_REG_ID_AA64SMFR0_EL1, data->arm_id_aa64smfr[0]);
 		cpu_exec_mrs(AARCH64_REG_ID_AA64ZFR0_EL1, data->arm_id_aa64zfr[0]);
-	}
+# else
+	/* Return ERR_NO_CPUID on AArch32 state */
+		return cpuid_set_error(ERR_NO_CPUID);
 # endif /* PLATFORM_AARCH64 */
+	}
 #else
-# warning This CPU architecture is not supported by libcpuid
-	UNUSED(data);
+    #if defined(_MSC_VER)
+        #pragma message("Warning: This CPU architecture is not supported by libcpuid")
+    #else
+        #warning This CPU architecture is not supported by libcpuid
+    #endif
+    UNUSED(data);
 #endif
 
 	if (affinity_saved)
