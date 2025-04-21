@@ -74,6 +74,7 @@ enum _intel_model_t {
 	_x5xx,  /* Xeon Bronze/Silver/Gold/Platinum x5xx */
 	_1xx,   /* Core Ultra [3579] 1xx */
 	_2xx,   /* Core Ultra [3579] 2xx */
+	_x5x,   /* Intel Processor/Core 3 x5x (Twin lake-N) */
 };
 typedef enum _intel_model_t intel_model_t;
 
@@ -477,30 +478,40 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6, 12, -1, -1, 140,  2,    -1,    -1, NC, CELERON_      ,     0, "Tiger Lake (Celeron)"     },
 
 	/* Alder Lake CPUs (2021, 12th gen, 10nm) => https://en.wikichip.org/wiki/intel/microarchitectures/alder_lake */
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_9  ,     _12xxx, "Alder Lake-S (Core i9)"  },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_7  ,     _12xxx, "Alder Lake-S (Core i7)"  },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_5  ,     _12xxx, "Alder Lake-S (Core i5)"  },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_3  ,     _12xxx, "Alder Lake-S (Core i3)"  },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, PENTIUM_      ,          0, "Alder Lake-S (Pentium)"  },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CELERON_      ,          0, "Alder Lake-S (Celeron)"  },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_9|_H|_X, _12xxx, "Alder Lake-HX (Core i9)" },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_7|_H|_X, _12xxx, "Alder Lake-HX (Core i7)" },
-	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_5|_H|_X, _12xxx, "Alder Lake-HX (Core i5)" },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_P  ,       0, "Alder Lake-P (Core i7)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_P  ,       0, "Alder Lake-P (Core i5)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_3|_P  ,       0, "Alder Lake-P (Core i3)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_U  ,       0, "Alder Lake-U (Core i7)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_U  ,       0, "Alder Lake-U (Core i5)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_3|_U  ,       0, "Alder Lake-U (Core i3)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, PENTIUM_      ,          0, "Alder Lake-U (Pentium)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CELERON_      ,          0, "Alder Lake-U (Celeron)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_9|_H  ,  _12xxx, "Alder Lake-H (Core i9)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_H  ,  _12xxx, "Alder Lake-H (Core i7)"  },
-	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_H  ,  _12xxx, "Alder Lake-H (Core i5)"  },
-	{  6, 14, -1, -1, 190, -1,    -1,    -1, NC, CORE_|_I_|_3|_N  ,       0, "Alder Lake-N (Core i3)"  },
-	{  6, 14, -1, -1, 190, -1,    -1,    -1, NC, ATOM_            ,       0, "Alder Lake-N (Atom)"     },
-	{  6, 14, -1, -1, 190,  4,    -1,    -1, NC, _N               ,       0, "Alder Lake-N"            },
-	{  6, 14, -1, -1, 190,  2,    -1,    -1, NC, _N               ,       0, "Alder Lake-N"            },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_9  ,     _12xxx, "Alder Lake-S (Core i9)"         },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_7  ,     _12xxx, "Alder Lake-S (Core i7)"         },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_5  ,     _12xxx, "Alder Lake-S (Core i5)"         },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_3  ,     _12xxx, "Alder Lake-S (Core i3)"         },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, PENTIUM_      ,          0, "Alder Lake-S (Pentium)"         },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CELERON_      ,          0, "Alder Lake-S (Celeron)"         },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_9|_H|_X, _12xxx, "Alder Lake-HX (Core i9)"        },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_7|_H|_X, _12xxx, "Alder Lake-HX (Core i7)"        },
+	{  6,  7, -1, -1, 151, -1,    -1,    -1, NC, CORE_|_I_|_5|_H|_X, _12xxx, "Alder Lake-HX (Core i5)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_P  ,       0, "Alder Lake-P (Core i7)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_P  ,       0, "Alder Lake-P (Core i5)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_3|_P  ,       0, "Alder Lake-P (Core i3)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_U  ,       0, "Alder Lake-U (Core i7)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_U  ,       0, "Alder Lake-U (Core i5)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_3|_U  ,       0, "Alder Lake-U (Core i3)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, PENTIUM_      ,          0, "Alder Lake-U (Pentium)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CELERON_      ,          0, "Alder Lake-U (Celeron)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_9|_H  ,  _12xxx, "Alder Lake-H (Core i9)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_H  ,  _12xxx, "Alder Lake-H (Core i7)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_H  ,  _12xxx, "Alder Lake-H (Core i5)"         },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_U|_L,      0, "Alder Lake-PS (Core i7)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_U|_L,      0, "Alder Lake-PS (Core i5)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_3|_U|_L,      0, "Alder Lake-PS (Core i3)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CELERON_|_L       ,      0, "Alder Lake-PS (Celeron)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_7|_H|_L, _12xxx, "Alder Lake-PS (Core i7)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_5|_H|_L, _12xxx, "Alder Lake-PS (Core i5)"        },
+	{  6, 10, -1, -1, 154, -1,    -1,    -1, NC, CORE_|_I_|_3|_H|_L, _12xxx, "Alder Lake-PS (Core i3)"        },
+	{  6, 14, -1, -1, 190, -1,    -1,    -1, NC, CORE_|_I_|_3|_N_ ,       0, "Alder Lake-N (Core i3)"         }, /* Core i3 N300 + Core i3 N305 */
+	{  6, 14, -1, -1, 190,  4,    -1,    -1, NC, _N_              ,       0, "Alder Lake-N (Intel Processor)" },
+	{  6, 14, -1, -1, 190,  2,    -1,    -1, NC, _N_              ,       0, "Alder Lake-N (Intel Processor)" }, /* Intel Processor N50 */
+	{  6, 14, -1, -1, 190, -1,    -1,    -1, NC, ATOM_            ,       0, "Alder Lake-N (Atom)"            },
+	/* Twin Lake CPUs (2025, Intel 7) => https://en.wikichip.org/wiki/intel/microarchitectures/twin_lake */
+	{  6, 14, -1, -1, 190,  8,    -1,    -1, NC, CORE_|_3|_N_     ,    _x5x, "Twin Lake-N (Core 3)"          }, /* Core 3 N350 + Core 3 N355 */
+	{  6, 14, -1, -1, 190,  4,    -1,    -1, NC, _N_              ,    _x5x, "Twin Lake-N (Intel Processor)" }, /* Intel Processor N150 + Intel Processor N150 */
 
 	/* Raptor Lake CPUs (2022, 13th Core i gen, Intel 7) => https://en.wikichip.org/wiki/intel/microarchitectures/raptor_lake */
 	{  6, 15, -1, -1, 191, -1,    -1,    -1, NC, CORE_|_I_|_5      , _13xxx, "Raptor Lake-S (Core i5)"  }, // "Golden Cove" cores
@@ -517,6 +528,7 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6, 10,  3, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_7|_U   ,      0, "Raptor Lake-U (Core i7)"  },
 	{  6, 10,  3, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_5|_U   ,      0, "Raptor Lake-U (Core i5)"  },
 	{  6, 10,  3, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_3|_U   ,      0, "Raptor Lake-U (Core i3)"  },
+	{  6, 10,  3, -1, 186, -1,    -1,    -1, NC, _U_               ,      0, "Raptor Lake-U (Intel Processor)" }, /* Intel Processor U300 */
 	{  6, 10, -1, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_9|_H   , _13xxx, "Raptor Lake-H (Core i9)"  },
 	{  6, 10, -1, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_7|_H   , _13xxx, "Raptor Lake-H (Core i7)"  },
 	{  6, 10, -1, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_5|_H   , _13xxx, "Raptor Lake-H (Core i5)"  },
@@ -525,9 +537,20 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_7      , _14xxx, "Raptor Lake-S (Core i7)"  },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_5      , _14xxx, "Raptor Lake-S (Core i5)"  },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_3      , _14xxx, "Raptor Lake-S (Core i3)"  },
+	{  6,  7, -1, -1, 183,  2,    -1,    -1, NC, 0                 ,      0, "Raptor Lake-S (Intel Processor )"}, /* Intel Processor 300 + Intel Processor 300T */
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_9|_H|_X, _14xxx, "Raptor Lake-HX (Core i9)" },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_7|_H|_X, _14xxx, "Raptor Lake-HX (Core i7)" },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_5|_H|_X, _14xxx, "Raptor Lake-HX (Core i5)" },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, XEON_             ,      0, "Raptor Lake (Xeon-E)"     },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_7|_U       ,   _1xx, "Raptor Lake-U (Core 7)"  }, /* Core 7 150U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_5|_U       ,   _1xx, "Raptor Lake-U (Core 5)"  }, /* Core 5 120U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_3|_U       ,   _1xx, "Raptor Lake-U (Core 3)"  }, /* Core 3 100U */
+	/* Raptor Lake Re-refresh CPUs (2025, Core Series 2 processors Intel 7) => https://en.wikipedia.org/wiki/Raptor_Lake#List_of_Core_Series_2_processors */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_7|_U       ,   _2xx, "Raptor Lake-U (Core 7)"  }, /* Core 7 250U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_5|_U       ,   _2xx, "Raptor Lake-U (Core 5)"  }, /* Core 5 220U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_9|_H       ,   _2xx, "Raptor Lake-H (Core 9)"  }, /* Core 9 270H */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_7|_H       ,   _2xx, "Raptor Lake-H (Core 7)"  }, /* Core 7 240H + Core 7 250H */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_5|_H       ,   _2xx, "Raptor Lake-H (Core 5)"  }, /* Core 5 210H + Core 5 220H */
 
 	/* Sapphire Rapids CPUs (2023, 4th Xeon Scalable gen, Intel 7) => https://en.wikichip.org/wiki/intel/microarchitectures/sapphire_rapids */
 	{  6, 15, -1, -1, 143, -1,    -1,    -1, NC, XEON_|_W_|_9     , _x4xx, "Sapphire Rapids-WS (Xeon w9)"       },
@@ -558,6 +581,10 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7|_S, _2xx, "Arrow Lake-S (Core Ultra 7)" },
 	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5|_S, _2xx, "Arrow Lake-S (Core Ultra 5)" },
 	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_3|_S, _2xx, "Arrow Lake-S (Core Ultra 3)" },
+	/* Lunar Lake CPUs (2024, Core Ultra Series 2 processors, TSMC N3B) => https://en.wikichip.org/wiki/intel/microarchitectures/lunar_lake */
+	{  6, 13, -1, -1, 189, -1,    -1,    -1, NC, CORE_|_ULTRA_|_9|_V, _1xx, "Lunar Lake-V (Core Ultra 9)" },
+	{  6, 13, -1, -1, 189, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7|_V, _1xx, "Lunar Lake-V (Core Ultra 7)" },
+	{  6, 13, -1, -1, 189, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5|_V, _1xx, "Lunar Lake-V (Core Ultra 5)" },
 	/* F   M   S  EF   EM #cores L2$    L3$  BC       ModelBits ModelCode                                  Name */
 
 
@@ -807,24 +834,49 @@ static intel_code_and_bits_t get_brand_code_and_bits(struct cpu_id_t* data)
 			}
 		}
 	}
-	if ((i = match_pattern(bs, "Core(TM) Ultra [579]")) != 0) {
+	/* https://www.intel.com/content/www/us/en/ark/products/series/236798/intel-core-processors-series-1.html
+	   https://www.intel.com/content/www/us/en/ark/products/series/238783/intel-core-processors-series-2.html */
+	else if ((i = match_pattern(bs, "Core(TM) [3579]")) != 0) {
+		bits |= CORE_;
+		i--;
+		switch (bs[i + 9]) {
+			case '3': bits |= _3; break;
+			case '5': bits |= _5; break;
+			case '7': bits |= _7; break;
+			case '9': bits |= _9; break;
+		}
+		for(i = i + 10; i < n; i++) {
+			switch (bs[i]) {
+				case 'E': bits |= _E; break;
+				case 'F': bits |= _F; break;
+				case 'H': bits |= _H; break;
+				case 'L': bits |= _L; break;
+				case 'T': bits |= _T; break;
+				case 'U': bits |= _U; break;
+			}
+		}
+	}
+	/* https://www.intel.com/content/www/us/en/ark/products/series/236803/intel-core-ultra-processors-series-1.html
+	   https://www.intel.com/content/www/us/en/ark/products/series/241071/intel-core-ultra-processors-series-2.html */
+	else if ((i = match_pattern(bs, "Core(TM) Ultra [3579]")) != 0) {
 		bits |= CORE_ | _ULTRA_;
 		i--;
 		switch (bs[i + 15]) {
-			//case '3': bits |= _3; break;
+			case '3': bits |= _3; break;
 			case '5': bits |= _5; break;
 			case '7': bits |= _7; break;
 			case '9': bits |= _9; break;
 		}
 		for(i = i + 16; i < n; i++) {
 			switch (bs[i]) {
+				case 'F': bits |= _F; break;
 				case 'H': bits |= _H; break;
-				//case 'K': bits |= _K; break;
-				//case 'N': bits |= _N; break;
-				//case 'P': bits |= _P; break;
-				//case 'S': bits |= _S; break;
+				case 'K': bits |= _K; break;
+				case 'L': bits |= _L; break;
+				case 'T': bits |= _T; break;
 				case 'U': bits |= _U; break;
-				//case 'X': bits |= _X; break;
+				case 'V': bits |= _V; break;
+				case 'X': bits |= _X; break;
 			}
 		}
 	}
@@ -847,6 +899,13 @@ static intel_code_and_bits_t get_brand_code_and_bits(struct cpu_id_t* data)
 		switch (bs[i + 8]) {
 			case 'D': bits |= _D_; break;
 			case 'W': bits |= _W_; break;
+		}
+	}
+	else if ((i = match_pattern(bs, "[NU]##")) != 0) {
+		i--;
+		switch (bs[i]) {
+			case 'N': bits |= _N_; break;
+			case 'U': bits |= _U_; break;
 		}
 	}
 
@@ -934,7 +993,7 @@ static intel_model_t get_model_code(struct cpu_id_t* data)
 	/* If the CPU is a Core ix, then just return the model number generation: */
 	if ((i = match_pattern(bs, "Core(TM) i[3579]")) != 0) {
 		i += 11;
-		if (i + 4 >= l) return UNKNOWN;
+		if (i + 3 >= l) return UNKNOWN;
 		if (bs[i] == '2') return _2xxx;
 		if (bs[i] == '3') return _3xxx;
 		if (bs[i] == '4') return _4xxx;
@@ -943,6 +1002,7 @@ static intel_model_t get_model_code(struct cpu_id_t* data)
 		if (bs[i] == '7') return _7xxx;
 		if (bs[i] == '8') return _8xxx;
 		if (bs[i] == '9') return _9xxx;
+		if (i + 4 >= l) return UNKNOWN;
 		if ((bs[i] == '1') && (bs[i+1] == '0')) return _10xxx;
 		if ((bs[i] == '1') && (bs[i+1] == '1')) return _11xxx;
 		if ((bs[i] == '1') && (bs[i+1] == '2')) return _12xxx;
@@ -950,9 +1010,17 @@ static intel_model_t get_model_code(struct cpu_id_t* data)
 		if ((bs[i] == '1') && (bs[i+1] == '4')) return _14xxx;
 		return UNKNOWN;
 	}
+	else if ((i = match_pattern(bs, "Core(TM) [3579]")) != 0) {
+		i += 11;
+		if (i + 2 >= l) return UNKNOWN;
+		if ((bs[i] == '1') && (bs[i+1] == '5')) return _x5x;
+		if ((bs[i] == '2') && (bs[i+1] == '5')) return _x5x;
+		if ((bs[i] == '3') && (bs[i+1] == '5')) return _x5x;
+		return UNKNOWN;
+	}
 	else if ((i = match_pattern(bs, "Core(TM) Ultra [3579]")) != 0) {
 		i += 16;
-		if (i + 3 >= l) return UNKNOWN;
+		if (i + 2 >= l) return UNKNOWN;
 		if (bs[i] == '1') return _1xx;
 		if (bs[i] == '2') return _2xx;
 		return UNKNOWN;
