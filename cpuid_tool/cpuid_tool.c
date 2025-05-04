@@ -54,8 +54,10 @@
 #include "libcpuid.h"
 
 /* Globals: */
-char raw_data_file[256] = "";
-char out_file[256] = "";
+#define RAW_DATA_FILE_MAX 256
+#define OUT_FILE_MAX 256
+char raw_data_file[RAW_DATA_FILE_MAX] = "";
+char out_file[OUT_FILE_MAX] = "";
 typedef enum {
 	NEED_CPUID_PRESENT,
 	NEED_ARCHITECTURE,
@@ -98,6 +100,7 @@ typedef enum {
 	NEED_L3_INSTANCES,
 	NEED_L4_INSTANCES,
 	NEED_CODENAME,
+	NEED_TECHNOLOGY,
 	NEED_FEATURES,
 	NEED_CLOCK,
 	NEED_CLOCK_OS,
@@ -172,6 +175,7 @@ matchtable[] = {
 	{ NEED_L3_INSTANCES , "--l3-instances" , 1},
 	{ NEED_L4_INSTANCES , "--l4-instances" , 1},
 	{ NEED_CODENAME     , "--codename"     , 1},
+	{ NEED_TECHNOLOGY   , "--technology"   , 1},
 	{ NEED_FEATURES     , "--flags"        , 1},
 	{ NEED_CLOCK        , "--clock"        , 0},
 	{ NEED_CLOCK_OS     , "--clock-os"     , 0},
@@ -237,8 +241,8 @@ static int parse_cmdline(int argc, char** argv)
 	if (argc == 1) {
 		/* Default command line options */
 		need_output = 1;
-		strcpy(raw_data_file, "raw.txt");
-		strcpy(out_file, "report.txt");
+		strncpy(raw_data_file, "raw.txt", RAW_DATA_FILE_MAX);
+		strncpy(out_file, "report.txt", OUT_FILE_MAX);
 		need_report = 1;
 		verbose_level = 1;
 		return 1;
@@ -261,7 +265,7 @@ static int parse_cmdline(int argc, char** argv)
 				xerror("--load: bad file specification!");
 			}
 			need_input = 1;
-			strcpy(raw_data_file, arg + 7);
+			strncpy(raw_data_file, arg + 7, RAW_DATA_FILE_MAX);
 			recog = 1;
 		}
 		if (!strncmp(arg, "--save=", 7)) {
@@ -275,14 +279,14 @@ static int parse_cmdline(int argc, char** argv)
 				xerror("--save: bad file specification!");
 			}
 			need_output = 1;
-			strcpy(raw_data_file, arg + 7);
+			strncpy(raw_data_file, arg + 7, RAW_DATA_FILE_MAX);
 			recog = 1;
 		}
 		if (!strncmp(arg, "--outfile=", 10)) {
 			if (strlen(arg) <= 10) {
 				xerror("--output: bad file specification!");
 			}
-			strcpy(out_file, arg + 10);
+			strncpy(out_file, arg + 10, RAW_DATA_FILE_MAX);
 			recog = 1;
 		}
 		if (!strcmp(arg, "--report") || !strcmp(arg, "--all")) {
@@ -504,6 +508,9 @@ static void print_info(output_data_switch query, struct cpu_id_t* data)
 			break;
 		case NEED_CODENAME:
 			fprintf(fout, "%s\n", data->cpu_codename);
+			break;
+			case NEED_TECHNOLOGY:
+			fprintf(fout, "%s\n", data->technology_node);
 			break;
 		case NEED_FEATURES:
 		{
@@ -826,6 +833,7 @@ int main(int argc, char** argv)
 					fprintf(fout, "  SSE units  : %d bits (%s)\n", data.cpu_types[cpu_type_index].x86.sse_size, data.cpu_types[cpu_type_index].detection_hints[CPU_HINT_SSE_SIZE_AUTH] ? "authoritative" : "non-authoritative");
 				}
 				fprintf(fout, "  code name  : `%s'\n", data.cpu_types[cpu_type_index].cpu_codename);
+				fprintf(fout, "  technology : `%s'\n", data.cpu_types[cpu_type_index].technology_node);
 				fprintf(fout, "  features   :");
 				/*
 				* Here we enumerate all CPU feature bits, and when a feature

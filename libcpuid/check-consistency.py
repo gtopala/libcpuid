@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-import os, sys, re, glob
+import argparse, os, sys, re, glob
+from pathlib import Path
 
-if len(sys.argv) != 2:
-	print("Usage: check-consistency <path>")
-	sys.exit(0)
+
+### Constants:
+git_root_dir = os.popen("git rev-parse --show-toplevel").read().splitlines()
 
 err = 0
 def getEnumElements(enumName):
-	f = open("%s/libcpuid.h" % sys.argv[1], "r")
+	f = open(f"{args.root_dir}/libcpuid.h", "r")
 	l = []
 	on = False
 	rexp = re.compile(r'^\s*([A-Z0-9_]+)(\s*=\s*[A-Z0-9_]+)?\s*,.*$')
@@ -27,7 +28,7 @@ def getEnumElements(enumName):
 	return []
 
 def getConstant(constantName):
-	f = open("%s/libcpuid_constants.h" % sys.argv[1], "r")
+	f = open(f"{args.root_dir}/libcpuid_constants.h", "r")
 	value = 0
 	for line in f:
 		items = line.strip().split()
@@ -37,10 +38,10 @@ def getConstant(constantName):
 	return value
 
 def checkEnumSize(enumName, constantName):
-	print("Checking enum `%s':" % enumName, end=' ')
+	print(f"Checking enum `{enumName}':", end=' ')
 	count = len(getEnumElements(enumName)) - 1
 	themax = getConstant(constantName)
-	print("%d elements; max size (%s=%d)..." % (count, constantName, themax), end=' ')
+	print(f"{count} elements; max size ({constantName}={themax})...", end=' ')
 	if count > themax:
 		err += 1
 		print("FAILED")
@@ -49,13 +50,27 @@ def checkEnumSize(enumName, constantName):
 	else:
 		print("OK")
 
+def check_type_directory(directory):
+	if not Path(directory).is_dir():
+		raise argparse.ArgumentTypeError(f"{directory} is not a directory")
+	return directory
+
+# Parse arguments
+parser = argparse.ArgumentParser(description="Check library consistency.")
+parser.add_argument("root_dir",
+	nargs='?',
+	type=check_type_directory,
+	default=f"{git_root_dir[-1]}/libcpuid" if len(git_root_dir) > 0 else "",
+	help="path to the libcpuid sub-directory")
+args = parser.parse_args()
+
 checkEnumSize("cpu_feature_t", "CPU_FLAGS_MAX")
 checkEnumSize("cpu_hint_t", "CPU_HINTS_MAX")
 checkEnumSize("cpu_sgx_feature_t", "SGX_FLAGS_MAX")
 
 rexp = re.compile('.*{ CPU_FEATURE_([^,]+), "([^"]+)".*}.*')
 print("Finding features:")
-for fn in glob.glob("%s/*.c" % sys.argv[1]):
+for fn in glob.glob(f"{args.root_dir}/*.c"):
 	f = open(fn, "rt")
 	line = 1
 	nfeat = 0
@@ -66,16 +81,16 @@ for fn in glob.glob("%s/*.c" % sys.argv[1]):
 			assert len(res) == 1, "Too many matches"
 			if res[0][0].lower() != res[0][1]:
 				err += 1
-				print("..Mismatch - %s:%d - `%s' vs `%s'" % (os.path.basename(fn), line, res[0][0], res[0][1]))
+				print(f"..Mismatch - {os.path.basename(fn)}:{line} - `{res[0][0]}' vs `{res[0][1]}'")
 		line += 1
 	if nfeat:
-		print("  %s: %d features described" % (os.path.basename(fn), nfeat))
+		print(f"  {os.path.basename(fn)}: {nfeat} features described")
 	f.close()
 
 # Check whether all features are converted by cpu_feature_str():
 
 allf = []
-f = open("%s/libcpuid.h" % sys.argv[1], "rt")
+f = open(f"{args.root_dir}/libcpuid.h", "rt")
 rexp = re.compile('\t(CPU_FEATURE_[^, ]+).*')
 for s in f.readlines():
 	if rexp.match(s):
@@ -85,22 +100,22 @@ f.close()
 
 impf = []
 rexp = re.compile('\t+{ (CPU_FEATURE_[^,]+).*')
-f = open("%s/cpuid_main.c" % sys.argv[1], "rt")
+f = open(f"{args.root_dir}/cpuid_main.c", "rt")
 for s in f.readlines():
 	if rexp.match(s):
 		entry = rexp.findall(s)[0]
 		if entry in impf:
 			err += 1
-			print("cpu_feature_str(): duplicate entry: %s" % entry)
+			print(f"cpu_feature_str(): duplicate entry: {entry}")
 		impf.append(entry)
 f.close()
 
-print("Found %d total features and %d named features" % (len(allf), len(impf)))
+print(f"Found {len(allf)} total features and {len(impf)} named features")
 
 for feature in allf:
 	if not feature in impf:
 		err += 1
-		print("cpu_feature_str(): don't have entry for %s" % feature)
+		print(f"cpu_feature_str(): don't have entry for {feature}")
 
 # Check whether all features have detection code:
 print("Checking whether all features have detection code...", end=' ')
@@ -112,7 +127,7 @@ rexp1 = re.compile(r'.*\[(CPU_FEATURE_[^ \]]+)\]\s*=\s*{.*') # e.g. "[CPU_FEATUR
 rexp2 = re.compile(r'.*(CPU_FEATURE_[^ ,]+),\s*FEATURE_LEVEL_ARM_.*') # e.g. "set_feature_status(data, ext_status, (mte_frac == 0b0000), CPU_FEATURE_MTE_ASYNC,           FEATURE_LEVEL_ARM_V8_5_A, -1);"
 rexp3 = re.compile(r'.*(CPU_FEATURE_[^ }]+).*') # e.g. "{ 28, CPU_FEATURE_HT },"
 
-for fn in glob.glob("%s/*.c" % sys.argv[1]):
+for fn in glob.glob(f"{args.root_dir}/*.c"):
 	f = open(fn, "rt")
 	files_code[fn] = []
 	for s in f.readlines():
@@ -142,13 +157,13 @@ for feature in allf:
 			print("FAILED:")
 			firstError = False
 		err += 1
-		print("..No detection code for %s" % feature)
+		print(f"..No detection code for {feature}")
 	if len(matching_files) > 1 and feature not in features_whitelist:
 		if firstError:
 			print("FAILED:")
 			firstError = False
 		err += 1
-		print("..Conflicting detection code for %s in files %s" % (feature, " and ".join(matching_files)))
+		print(f"..Conflicting detection code for {feature} in files {' and '.join(matching_files)}")
 
 if firstError:
 	print("All OK.")
@@ -162,8 +177,9 @@ cache_exp = re.compile(r".*([\(/ ][0-9]+K).*")
 definitions = 0
 match_entry_fields = 12 # this number needs to change if the definition of match_entry_t ever changes
 codename_str_max = 64-1 # this number needs to change if the value of CODENAME_STR_MAX ever changes
+technology_str_max = 16-1 # this number needs to change if the value of TECHNOLOGY_STR_MAX ever changes
 common_cache_sizes = ["8", "16", "32", "64", "128", "256", "512", "1024", "2048", "3072", "4096", "6144", "8192", "12288", "16384"]
-for fn in glob.glob("%s/*.c" % sys.argv[1]):
+for fn in glob.glob(f"{args.root_dir}/*.c"):
 	bfn = os.path.basename(fn)
 	nline = 0
 	f = open(fn, "rt")
@@ -177,33 +193,46 @@ for fn in glob.glob("%s/*.c" % sys.argv[1]):
 		if not has_matchtable:
 			continue
 		i = line.find("{")
-		j = line.find("}")
+		j = line.rfind("}")
 		if i == -1 or j == -1 or i > j:
 			continue
 		inner = line[i+1:j]
 		parts = inner.split(",")
 		if len(parts) == match_entry_fields:
 			cdefs += 1
-			s = parts[match_entry_fields-1].strip()
-			if s[0] != '"' or s[-1] != '"':
+			# Check CPU codename string
+			codename = parts[10].strip()
+			if codename[0] != '"' or codename[-1] != '"':
 				err += 1
-				print("..Warning, %s:%d - cannot correctly handle the cpu codename" % (bfn, nline))
+				print(f"..Warning, {bfn}:{nline} - cannot correctly handle the cpu codename ({codename})")
 				allok = False
 				continue
-			s = s[1:-1]
-			if len(s) > codename_str_max:
+			codename = codename[1:-1]
+			if len(codename) > codename_str_max:
 				err += 1
-				print("..%s:%d - codename (%s) is longer than %d characters!" % (bfn, nline, s, codename_str_max))
+				print(f"..{bfn}:{nline} - codename ({codename}) is longer than {codename_str_max} characters!")
 				allok = False
-			if cache_exp.match(s):
-				cache_size = cache_exp.findall(s)[0][1:-1]
+			if cache_exp.match(codename):
+				cache_size = cache_exp.findall(codename)[0][1:-1]
 				if not cache_size in common_cache_sizes:
 					err += 1
-					print("..Warning, %s:%d - suspicious cache size in codename [%s] (%s)" % (bfn, nline, s, cache_size))
+					print(f"..Warning, {bfn}:{nline} - suspicious cache size in codename [{codename}] ({cache_size})")
 					allok = False
+			# Check CPU technology string
+			technology = parts[11].strip()
+			if (technology[0] != '"' or technology[-1] != '"') and technology != "UNKN_STR":
+				err += 1
+				print(f"..Warning, {bfn}:{nline} - cannot correctly handle the cpu technology ({technology})")
+				allok = False
+				continue
+			technology = technology[1:-1]
+			if len(technology) > technology_str_max:
+				err += 1
+				print(f"..{bfn}:{nline} - technology ({technology}) is longer than {technology_str_max} characters!")
+				allok = False
 	if cdefs:
 		definitions += 1
-		print("  %s: %d processor definitions," % (bfn, cdefs), end=' ')
+		print(f"  {bfn}: {cdefs} processor definitions,", end=' ')
 		if allok:
 			print("all OK")
 		else:
